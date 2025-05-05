@@ -1,0 +1,147 @@
+
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+  <meta charset="UTF-8">
+  <title>Անձրև</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #0b0c10;
+      height: 100%;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .message {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-family: sans-serif;
+      font-size: 16px;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="rainCanvas"></canvas>
+
+<script>
+const canvas = document.getElementById("rainCanvas");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const words = [
+  "Աննա", "Հրեշտակ", "շողք", "արև", "Սամո", "Հույս", "լույս",
+  "խաղաղություն", "երազանք", "ջերմություն", "կյանք", "փայլ",
+  "ժպիտ", "գարուն", "մաքրություն", "թեթևություն", "բարություն",
+  "թևեր", "սպասում", "երազ", "կապույտ", "կախարդանք", "սրտիկ"
+];
+
+const wordMessages = {
+  "Աննա": "Դու կատարյալ ես ինչպես ոչ ոք",
+  "Հրեշտակ": "Միակ հրեշտակը ում ես տեսել եմ իրականում դա դու ես",
+  "շողք": "Քո շողքը ամենուր է տարածված հատկապես իմ ներսում",
+  "արև": "Արևից էլ ուժեղ էներգիա ես ինձ փոխանցում",
+  "Սամո": "Միշտ քո կողքն եմ արևս",
+  "Հույս": "Դու իմ հավատն ես",
+  "լույս": "Լուսավորում ես նույնիսկ գիշերը",
+  "խաղաղություն": "Ներսդ շատ ներդաշնակ է ու խաղաղություն է պարգևում ինձ",
+  "երազանք": "Հավատա երազանքիդ",
+  "ջերմություն": "Քո տված ջերմությունը անսպառ է",
+  "կյանք": "Չհանձնվես",
+  "փայլ": "Աչքերումդ մի մեծ փայլ կա",
+  "ժպիտ": "Ժպիտդ ամենագեղեցիկն ու տարբերվող է իմ համար",
+  "գարուն": "Գարնան պես գեղեցիկ ու հանգիստ ես",
+  "մաքրություն": "Հոգու մաքրությունը ամենակարևորն է",
+  "թեթևություն": "Քեզ նայելիս ամեն բան դառնում է թեթև",
+  "բարություն": "Դու բարության մարմնավորումն ես",
+  "թևեր": "Միշտ թաքցնում ես հրեշտակին թևերը",
+  "սպասում": "Ամեն պահ քեզ եմ սպասում",
+  "երազ": "Երազներումս դու ես միշտ",
+  "կապույտ": "Քո հայացքը անսահման կապույտ երկինք է",
+  "կախարդանք": "Դու իմ վրա կախարդանք ունես",
+  "սրտիկ": "Իմ հրեշտակ"
+};
+
+const drops = [];
+
+function Drop(word) {
+  this.x = Math.random() * canvas.width;
+  this.y = Math.random() * canvas.height - canvas.height;
+  this.speed = 2 + Math.random() * 3;
+  this.word = word;
+  this.fontSize = 20 + Math.random() * 10;
+}
+
+for (let i = 0; i < 100; i++) {
+  const word = words[Math.floor(Math.random() * words.length)];
+  drops.push(new Drop(word));
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#0b0c10";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let drop of drops) {
+    ctx.fillStyle = "white";
+    ctx.font = drop.fontSize + "px Arial";
+    ctx.fillText(drop.word, drop.x, drop.y);
+
+    drop.y += drop.speed;
+    if (drop.y > canvas.height) {
+      drop.y = -20;
+      drop.x = Math.random() * canvas.width;
+      drop.word = words[Math.floor(Math.random() * words.length)];
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+canvas.addEventListener("click", function(event) {
+  const clickX = event.clientX;
+  const clickY = event.clientY;
+
+  for (let drop of drops) {
+    const textWidth = ctx.measureText(drop.word).width;
+    const textHeight = drop.fontSize;
+    if (
+      clickX >= drop.x - 10 &&
+      clickX <= drop.x + textWidth + 10 &&
+      clickY >= drop.y - textHeight - 10 &&
+      clickY <= drop.y + 10
+    ) {
+      showMessage(drop.word, clickX, clickY);
+      break;
+    }
+  }
+});
+
+function showMessage(word, x, y) {
+  const msg = wordMessages[word] || "Սիրուն բառ է։";
+  const div = document.createElement("div");
+  div.className = "message";
+  div.style.left = x + "px";
+  div.style.top = y + "px";
+  div.textContent = msg;
+  document.body.appendChild(div);
+
+  setTimeout(() => {
+    div.remove();
+  }, 3000);
+}
+</script>
+</body>
+</html>
